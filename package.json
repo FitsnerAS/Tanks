@@ -1,0 +1,21 @@
+{
+  "name": "Tanks",
+  "version": "1.0.1",
+  "keywords": [
+    "util",
+    "functional",
+    "server",
+    "client",
+    "browser"
+  ],
+  "author": "Aliaksandr Fitsner",
+  "contributors": [],
+  "dependencies": {
+    "grunt": "^1.0.1"
+  },
+  "devDependencies": {
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "webpack": "3.10.0"
+  }
+}

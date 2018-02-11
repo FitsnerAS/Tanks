@@ -15,6 +15,9 @@ var Game = (function (game) {
             case control.right:
                 keys.right = action;
                 break;
+            case control.fire:
+                keys.fire = action;
+                break;
         }
     }
 
@@ -24,7 +27,7 @@ var Game = (function (game) {
     window.document.addEventListener('keyup', function (ev) {
         keySet(ev.which, false);
     });
-    
+
     game.keys = keys;
     return game;
 })(Game || {});

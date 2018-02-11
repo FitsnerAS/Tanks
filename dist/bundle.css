@@ -65,12 +65,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: url(../img/t95_1600x900_noc_ru.jpg);
+    background-image: url(../../src/img/t95_1600x900_noc_ru.jpg);
     background-size: cover
 }
 
 .game-area {
-    border:gray solid 1px;
+    border: gray solid 1px;
     display: none;
 }
 
@@ -89,13 +89,92 @@ body {
     border: none;
     cursor: pointer;
 } 
-start-btn:hover { 
+.start-btn:hover {
     background: rgb(232,95,76);
 }
-start-btn:active {
+.start-btn:active {
     background: rgb(152,15,0);
 }
-
+.popup__overlay.active {
+    display: block;
+}
+.popup__overlay .start-btn {
+    position: absolute;
+    bottom: 0;
+    left: 45%;
+}
+.popup__overlay {
+    display: none;
+    position: fixed;
+    left:  0;
+    top:  0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    background: rgba(255,255,255,0.8);
+}
+.popup {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 512px;
+    height: 512px;
+    margin-left: -256px;
+    margin-top: -256px;
+    background: url("../../src/img/game-over-png-8.png");
+}
+.score.active {
+    display: block;
+}
+.score {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 150px;
+    height: 300px;
+    background: white;
+    opacity: 0.8;
+    border: #999999 solid 1px;
+    margin-left: 40px;
+}
+.score span {
+    display: block;
+    padding: 10px 15px;
+    color: #222222;
+    font-family: Arial;
+    font-size: 11px;
+}
+.score.new-level.win-game {
+    background:url("../../src/img/1.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.score.new-level {
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    width: auto;
+    height: auto;
+    margin: 0;
+    background:url("../../src/img/level-2.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    border: none;
+}
+.score.new-level span {
+    font-size: 20px;
+    color: rgb(212,75,56);
+    text-align: center;
+    margin-top: 10px;
+}
+.score .start-btn {
+    display: none;
+}
+.score.new-level .start-btn{
+    display: block;
+}
 /* ==========================================================================
    Media Queries
    ========================================================================== */

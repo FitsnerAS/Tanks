@@ -4,7 +4,7 @@ var Game = (function (game) {
     function Sprite(spriteImg) {
         var sprite = new Image();
         sprite.src = spriteImg;
-        
+
         this.drawImg = function (sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight) {
             context.drawImage(sprite, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
         };
@@ -14,5 +14,5 @@ var Game = (function (game) {
     }
     game.Sprite = Sprite;
     return game;
-})(Game);
+})(Game || {});
 
