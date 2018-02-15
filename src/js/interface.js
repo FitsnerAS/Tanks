@@ -1,0 +1,20 @@
+var Game = {
+    Bullet: null,
+    Eagle: null,
+    Sound: null,
+    Sprite: null,
+    Tank: null,
+    canvas: null,
+    collision: null,
+    currentLevel: null,
+    events: null,
+    init: null,
+    keys: null,
+    localUser: null,
+    map: null,
+    options: null,
+    reset: null,
+    units: null,
+    unitsActions: null,
+    utils: null
+};

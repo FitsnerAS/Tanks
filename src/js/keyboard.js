@@ -1,4 +1,5 @@
 var Game = (function (game) {
+    var events = game.events;
     var keys = {};
     var control = game.options.control;
     function keySet(key, action) {
@@ -17,6 +18,9 @@ var Game = (function (game) {
                 break;
             case control.fire:
                 keys.fire = action;
+                break;
+            case control.pause:
+                !action && events.publish('/pause');
                 break;
         }
     }

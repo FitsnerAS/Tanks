@@ -16,14 +16,14 @@ var Game = (function (game) {
         var currentUnitX2 = currentUnit.nextX + currentUnit.width;
         var currentUnitY1 = currentUnit.nextY;
         var currentUnitY2 = currentUnit.nextY + currentUnit.height;
-        var collisionObject = game.units.filter(function (unit, i, arr) {
+        var collisionObject = game.units.filter(function (unit) {
             if (unit.id === currentUnit.id) {
                 return false;
             }
-            var secondUnitX1 = unit.dx;
-            var secondUnitX2 = unit.dx + unit.width;
-            var secondUnitY1 = unit.dy;
-            var secondUnitY2 = unit.dy + unit.height;
+            var secondUnitX1 = unit.collisionDx();
+            var secondUnitX2 = unit.collisionDx() + unit.width;
+            var secondUnitY1 = unit.collisionDy();
+            var secondUnitY2 = unit.collisionDy() + unit.height;
 
             var areCollidingOnX = secondUnitX1 > currentUnitX1 && secondUnitX1 < currentUnitX2 ||
                 currentUnitX1 >= secondUnitX1 && currentUnitX1 < secondUnitX2;

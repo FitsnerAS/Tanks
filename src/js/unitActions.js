@@ -6,6 +6,7 @@ var Game = (function (game) {
     var _botsApearenceInterval = null;
     var unitsActions = {};
     var events = game.events;
+    var _pause = false;
 
     unitsActions.localUnitAction = function () {
         unit = game.localUser;
@@ -40,6 +41,7 @@ var Game = (function (game) {
             unit.move(options.direction.left, collision.collisionObject);
             return;
         }
+        unit.tankMoveSound.stop();
     };
 
     unitsActions.botsAction = function () {
@@ -133,6 +135,9 @@ var Game = (function (game) {
         var botsCount = 0;
         var dx, dy = null;
         _botsApearenceInterval = setInterval(function () {
+            if (_pause) {
+                return;
+            }
             if (botsCount === options.botsCount) {
                 clearInterval(_botsApearenceInterval);
                 return;
@@ -146,7 +151,7 @@ var Game = (function (game) {
                 nextX: dx,
                 nextY: dy,
                 width: options.tankWidth,
-                height: options.tankHeigth,
+                height: options.tankHeight,
                 id: botsCount
             }).unit) {
                 dx = options.botsEnterCoords.dx[utils.getRandom(utils.getRandom(options.botsEnterCoords.dx.length))];
@@ -156,8 +161,14 @@ var Game = (function (game) {
         }, options.botsApearenceInterval);
     };
 
+    function togglePause() {
+        _pause = !_pause;
+        game.localUser.tankMoveSound.stop();
+    }
+
     //events
     events.on('win', nextLevel);
+    events.on('/pause', togglePause);
 
     game.unitsActions = unitsActions;
     return game;

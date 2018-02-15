@@ -3,10 +3,10 @@ var Game = (function (game) {
     var _tankSprite = new game.Sprite(options.source.tilesImg);
     var fireSound = new game.Sound(options.source.bullet);
     var explosion = new game.Sound(options.source.explosion);
+    var tankMove = new game.Sound(options.source.tankMove);
 
 
     function Tank(enemy, speed, dx, dy, isLocalUser, isBot, direction, id) {
-        var that = this;
         var tankTiles = null;
         var _spriteIndex = 0;
 
@@ -36,11 +36,12 @@ var Game = (function (game) {
             };
         }
         this.tankSprite = _tankSprite;
+        this.tankMoveSound = tankMove;
         this.direction = direction;
         this.id = id;
         this.size = options.tankSize;
         this.width = options.tankWidth;
-        this.height = options.tankHeigth;
+        this.height = options.tankHeight;
         this.spriteColumns = options.tankSpriteColumns;
         this.enemy = enemy;
         this.isLocalUser = isLocalUser;
@@ -49,12 +50,19 @@ var Game = (function (game) {
         this.speed = speed;
         this.dx = dx;
         this.dy = dy;
+        this.collisionDx = function () {
+            return this.dx + options.deltaTankDx;
+        };
+        this.collisionDy = function () {
+            return this.dy + options.deltaTankDy;
+        };
         this.isShooting = false;
         this.isBullet = false;
         this.onFire = false;
         this.isDeactivated = false;
         this.deactivation = false;
         this.move = function (direction, collisionDetection) {
+            this.isLocalUser && this.tankMoveSound.playAlways();
             this.direction = direction;
             var collisionObject = null;
 
@@ -63,14 +71,14 @@ var Game = (function (game) {
             switch (direction) {
                 case 'up':
                     collisionObject = collisionDetection({
-                        nextX: that.dx,
-                        nextY: that.dy - that.speed,
-                        width: that.size,
-                        height: that.size,
-                        id: that.id
+                        nextX: this.collisionDx(),
+                        nextY: this.collisionDy() - this.speed,
+                        width: this.width,
+                        height: this.height,
+                        id: this.id
                     });
                     if (!collisionObject.map && !collisionObject.unit) {
-                        that.dy -= that.speed;
+                        this.dy -= this.speed;
                     }
                     if (!this.onFire) {
                         this.tile = tankTiles.up[_spriteIndex];
@@ -78,14 +86,14 @@ var Game = (function (game) {
                     break;
                 case 'down':
                     collisionObject = collisionDetection({
-                        nextX: that.dx,
-                        nextY: that.dy + that.speed,
-                        width: that.size,
-                        height: that.size,
-                        id: that.id
+                        nextX: this.collisionDx(),
+                        nextY: this.collisionDy() + this.speed,
+                        width: this.width,
+                        height: this.height,
+                        id: this.id
                     });
                     if (!collisionObject.map && !collisionObject.unit) {
-                        that.dy += that.speed;
+                        this.dy += this.speed;
                     }
                     if (!this.onFire) {
                         this.tile = tankTiles.down[_spriteIndex];
@@ -93,14 +101,14 @@ var Game = (function (game) {
                     break;
                 case 'left':
                     collisionObject = collisionDetection({
-                        nextX: that.dx - that.speed,
-                        nextY: that.dy,
-                        width: that.size,
-                        height: that.size,
-                        id: that.id
+                        nextX: this.collisionDx() - this.speed,
+                        nextY: this.collisionDy(),
+                        width: this.width,
+                        height: this.height,
+                        id: this.id
                     });
                     if (!collisionObject.map && !collisionObject.unit) {
-                        that.dx -= that.speed;
+                        this.dx -= this.speed;
                     }
                     if (!this.onFire) {
                         this.tile = tankTiles.left[_spriteIndex];
@@ -108,14 +116,14 @@ var Game = (function (game) {
                     break;
                 case 'right':
                     collisionObject = collisionDetection({
-                        nextX: that.dx + that.speed,
-                        nextY: that.dy,
-                        width: that.size,
-                        height: that.size,
-                        id: that.id
+                        nextX: this.collisionDx() + this.speed,
+                        nextY: this.collisionDy(),
+                        width: this.width,
+                        height: this.height,
+                        id: this.id
                     });
                     if (!collisionObject.map && !collisionObject.unit) {
-                        that.dx += that.speed;
+                        this.dx += this.speed;
                     }
                     if (!this.onFire) {
                         this.tile = tankTiles.right[_spriteIndex];
@@ -130,11 +138,12 @@ var Game = (function (game) {
             _spriteIndex = 0;
             var bullet = new Bullet(this.dx, this.dy, this.direction, this.speed * 4);
             bullet.__proto__ = this;
-            fireSound.play();
+            this.isLocalUser && fireSound.play();
             return bullet;
         };
         this.deactivate = function () {
             explosion.play();
+            this.isLocalUser && this.tankMoveSound.stop();
             this.deactivation = true;
             _spriteIndex = 0;
         };
@@ -164,6 +173,12 @@ var Game = (function (game) {
     var Eagle = {
         dx: options.eagle.enterCoords.dx,
         dy: options.eagle.enterCoords.dy,
+        collisionDx: function () {
+            return options.eagle.enterCoords.dx;
+        },
+        collisionDy: function () {
+            return options.eagle.enterCoords.dy;
+        },
         tile: options.eagle.tile,
         size: options.eagle.size,
         height: options.eagle.height,

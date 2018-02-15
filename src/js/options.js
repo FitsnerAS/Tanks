@@ -5,7 +5,8 @@ var Game = (function (game) {
             right: 39,
             down: 40,
             left: 37,
-            fire: 32
+            fire: 32,
+            pause: 80
         },
         direction: {
             up: 'up',
@@ -31,7 +32,7 @@ var Game = (function (game) {
         spriteColumns: 21,
         tankSpriteColumns: 22,
         levelsCount: 2,
-        botsCount: 10,
+        botsCount: 3,
         shootingFrequency: 40,
         botsEnterCoords: {
             dx: [0, 448, 928],
@@ -51,9 +52,15 @@ var Game = (function (game) {
             size: 32,
             width: 32
         },
-        tankWidth: 32,
-        tankHeigth: 32,
+        tankWidth: 28,
+        tankHeight: 28,
         tankSize: 32,
+        deltaTankDx: 2,
+        deltaTankDy: 2,
+        bulletWidth: 10,
+        bulletHeight: 10,
+        deltaBulletDx: 11,
+        deltaBulletDy: 11,
         tanksSpeed: 2,
         botsSaturation: 10,
         botsApearenceInterval: 3000, //ms

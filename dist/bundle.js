@@ -36,7 +36,8 @@ var Game = (function (game) {
             right: 39,
             down: 40,
             left: 37,
-            fire: 32
+            fire: 32,
+            pause: 80
         },
         direction: {
             up: 'up',
@@ -62,7 +63,7 @@ var Game = (function (game) {
         spriteColumns: 21,
         tankSpriteColumns: 22,
         levelsCount: 2,
-        botsCount: 10,
+        botsCount: 3,
         shootingFrequency: 40,
         botsEnterCoords: {
             dx: [0, 448, 928],
@@ -82,9 +83,15 @@ var Game = (function (game) {
             size: 32,
             width: 32
         },
-        tankWidth: 32,
-        tankHeigth: 32,
+        tankWidth: 28,
+        tankHeight: 28,
         tankSize: 32,
+        deltaTankDx: 2,
+        deltaTankDy: 2,
+        bulletWidth: 10,
+        bulletHeight: 10,
+        deltaBulletDx: 11,
+        deltaBulletDy: 11,
         tanksSpeed: 2,
         botsSaturation: 10,
         botsApearenceInterval: 3000, //ms
@@ -215,6 +222,7 @@ var Game = (function (game) {
         return game;
 })(Game || {});
 var Game = (function (game) {
+    var events = game.events;
     var keys = {};
     var control = game.options.control;
     function keySet(key, action) {
@@ -233,6 +241,9 @@ var Game = (function (game) {
                 break;
             case control.fire:
                 keys.fire = action;
+                break;
+            case control.pause:
+                !action && events.publish('/pause');
                 break;
         }
     }
@@ -350,14 +361,14 @@ var Game = (function (game) {
         var currentUnitX2 = currentUnit.nextX + currentUnit.width;
         var currentUnitY1 = currentUnit.nextY;
         var currentUnitY2 = currentUnit.nextY + currentUnit.height;
-        var collisionObject = game.units.filter(function (unit, i, arr) {
+        var collisionObject = game.units.filter(function (unit) {
             if (unit.id === currentUnit.id) {
                 return false;
             }
-            var secondUnitX1 = unit.dx;
-            var secondUnitX2 = unit.dx + unit.width;
-            var secondUnitY1 = unit.dy;
-            var secondUnitY2 = unit.dy + unit.height;
+            var secondUnitX1 = unit.collisionDx();
+            var secondUnitX2 = unit.collisionDx() + unit.width;
+            var secondUnitY1 = unit.collisionDy();
+            var secondUnitY2 = unit.collisionDy() + unit.height;
 
             var areCollidingOnX = secondUnitX1 > currentUnitX1 && secondUnitX1 < currentUnitX2 ||
                 currentUnitX1 >= secondUnitX1 && currentUnitX1 < secondUnitX2;
@@ -393,6 +404,7 @@ var Game = (function (game) {
     function Sound(src) {
         this.sound = document.createElement("audio");
         this.sound.src = src;
+        this.sound.volume = 0.05;
         this.sound.setAttribute("preload", "auto");
         this.sound.setAttribute("controls", "none");
         this.sound.style.display = "none";
@@ -416,10 +428,10 @@ var Game = (function (game) {
     var _tankSprite = new game.Sprite(options.source.tilesImg);
     var fireSound = new game.Sound(options.source.bullet);
     var explosion = new game.Sound(options.source.explosion);
+    var tankMove = new game.Sound(options.source.tankMove);
 
 
     function Tank(enemy, speed, dx, dy, isLocalUser, isBot, direction, id) {
-        var that = this;
         var tankTiles = null;
         var _spriteIndex = 0;
 
@@ -449,11 +461,12 @@ var Game = (function (game) {
             };
         }
         this.tankSprite = _tankSprite;
+        this.tankMoveSound = tankMove;
         this.direction = direction;
         this.id = id;
         this.size = options.tankSize;
         this.width = options.tankWidth;
-        this.height = options.tankHeigth;
+        this.height = options.tankHeight;
         this.spriteColumns = options.tankSpriteColumns;
         this.enemy = enemy;
         this.isLocalUser = isLocalUser;
@@ -462,12 +475,19 @@ var Game = (function (game) {
         this.speed = speed;
         this.dx = dx;
         this.dy = dy;
+        this.collisionDx = function () {
+            return this.dx + options.deltaTankDx;
+        };
+        this.collisionDy = function () {
+            return this.dy + options.deltaTankDy;
+        };
         this.isShooting = false;
         this.isBullet = false;
         this.onFire = false;
         this.isDeactivated = false;
         this.deactivation = false;
         this.move = function (direction, collisionDetection) {
+            this.isLocalUser && this.tankMoveSound.playAlways();
             this.direction = direction;
             var collisionObject = null;
 
@@ -476,14 +496,14 @@ var Game = (function (game) {
             switch (direction) {
                 case 'up':
                     collisionObject = collisionDetection({
-                        nextX: that.dx,
-                        nextY: that.dy - that.speed,
-                        width: that.size,
-                        height: that.size,
-                        id: that.id
+                        nextX: this.collisionDx(),
+                        nextY: this.collisionDy() - this.speed,
+                        width: this.width,
+                        height: this.height,
+                        id: this.id
                     });
                     if (!collisionObject.map && !collisionObject.unit) {
-                        that.dy -= that.speed;
+                        this.dy -= this.speed;
                     }
                     if (!this.onFire) {
                         this.tile = tankTiles.up[_spriteIndex];
@@ -491,14 +511,14 @@ var Game = (function (game) {
                     break;
                 case 'down':
                     collisionObject = collisionDetection({
-                        nextX: that.dx,
-                        nextY: that.dy + that.speed,
-                        width: that.size,
-                        height: that.size,
-                        id: that.id
+                        nextX: this.collisionDx(),
+                        nextY: this.collisionDy() + this.speed,
+                        width: this.width,
+                        height: this.height,
+                        id: this.id
                     });
                     if (!collisionObject.map && !collisionObject.unit) {
-                        that.dy += that.speed;
+                        this.dy += this.speed;
                     }
                     if (!this.onFire) {
                         this.tile = tankTiles.down[_spriteIndex];
@@ -506,14 +526,14 @@ var Game = (function (game) {
                     break;
                 case 'left':
                     collisionObject = collisionDetection({
-                        nextX: that.dx - that.speed,
-                        nextY: that.dy,
-                        width: that.size,
-                        height: that.size,
-                        id: that.id
+                        nextX: this.collisionDx() - this.speed,
+                        nextY: this.collisionDy(),
+                        width: this.width,
+                        height: this.height,
+                        id: this.id
                     });
                     if (!collisionObject.map && !collisionObject.unit) {
-                        that.dx -= that.speed;
+                        this.dx -= this.speed;
                     }
                     if (!this.onFire) {
                         this.tile = tankTiles.left[_spriteIndex];
@@ -521,14 +541,14 @@ var Game = (function (game) {
                     break;
                 case 'right':
                     collisionObject = collisionDetection({
-                        nextX: that.dx + that.speed,
-                        nextY: that.dy,
-                        width: that.size,
-                        height: that.size,
-                        id: that.id
+                        nextX: this.collisionDx() + this.speed,
+                        nextY: this.collisionDy(),
+                        width: this.width,
+                        height: this.height,
+                        id: this.id
                     });
                     if (!collisionObject.map && !collisionObject.unit) {
-                        that.dx += that.speed;
+                        this.dx += this.speed;
                     }
                     if (!this.onFire) {
                         this.tile = tankTiles.right[_spriteIndex];
@@ -543,11 +563,12 @@ var Game = (function (game) {
             _spriteIndex = 0;
             var bullet = new Bullet(this.dx, this.dy, this.direction, this.speed * 4);
             bullet.__proto__ = this;
-            fireSound.play();
+            this.isLocalUser && fireSound.play();
             return bullet;
         };
         this.deactivate = function () {
             explosion.play();
+            this.isLocalUser && this.tankMoveSound.stop();
             this.deactivation = true;
             _spriteIndex = 0;
         };
@@ -577,6 +598,12 @@ var Game = (function (game) {
     var Eagle = {
         dx: options.eagle.enterCoords.dx,
         dy: options.eagle.enterCoords.dy,
+        collisionDx: function () {
+            return options.eagle.enterCoords.dx;
+        },
+        collisionDy: function () {
+            return options.eagle.enterCoords.dy;
+        },
         tile: options.eagle.tile,
         size: options.eagle.size,
         height: options.eagle.height,
@@ -592,6 +619,7 @@ var Game = (function (game) {
 
 
 var Game = (function (game) {
+    var options = game.options;
 
     function Bullet(dx, dy, direction, speed) {
         var bulletTiles = {
@@ -599,12 +627,20 @@ var Game = (function (game) {
             right: 5,
             down: 6,
             left: 4,
-            deactivate: [8 ,7, 7, 8 ]
+            deactivate: [8, 7, 7, 8]
         };
         var _deactivationIndex = 0;
 
         this.dx = dx;
         this.dy = dy;
+        this.collisionDx = function () {
+            return this.dx + options.deltaBulletDx;
+        };
+        this.collisionDy = function () {
+            return this.dy + options.deltaBulletDy;
+        };
+        this.width = options.bulletWidth;
+        this.height = options.bulletHeight;
         this.direction = direction;
         this.isBot = false;
         this.isLocalUser = false;
@@ -617,15 +653,15 @@ var Game = (function (game) {
             this.__proto__.isShooting = false;
             this.deactivation = true;
         };
-        this.onDeactivationAnimation= function() {
+        this.onDeactivationAnimation = function () {
 
-          if(_deactivationIndex < bulletTiles.deactivate.length - 1){
-              _deactivationIndex++;
-          }else {
-              _deactivationIndex = 0;
-              this.isDeactivated = true;
-          }
-          this.tile = bulletTiles.deactivate[_deactivationIndex]
+            if (_deactivationIndex < bulletTiles.deactivate.length - 1) {
+                _deactivationIndex++;
+            } else {
+                _deactivationIndex = 0;
+                this.isDeactivated = true;
+            }
+            this.tile = bulletTiles.deactivate[_deactivationIndex]
         };
         this.move = function (direction, collisionDetection) {
             var collisionObject = null;
@@ -633,49 +669,56 @@ var Game = (function (game) {
             switch (direction) {
                 case 'up':
                     collisionObject = collisionDetection({
-                        nextX: this.dx,
-                        nextY: this.dy,
+                        nextX: this.collisionDx(),
+                        nextY: this.collisionDy(),
                         width: this.width,
                         height: this.height,
                         id: this.id
                     });
-                    this.dy -= this.speed;
+                    if (!collisionObject.unit && !collisionObject.map) {
+                        this.dy -= this.speed;
+                    }
                     break;
                 case 'down':
                     collisionObject = collisionDetection({
-                        nextX: this.dx,
-                        nextY: this.dy,
+                        nextX: this.collisionDx(),
+                        nextY: this.collisionDy(),
                         width: this.width,
                         height: this.height,
                         id: this.id
                     });
-                    this.dy += this.speed;
+                    if (!collisionObject.unit && !collisionObject.map) {
+                        this.dy += this.speed;
+                    }
                     break;
                 case 'left':
                     collisionObject = collisionDetection({
-                        nextX: this.dx,
-                        nextY: this.dy,
+                        nextX: this.collisionDx(),
+                        nextY: this.collisionDy(),
                         width: this.width,
                         height: this.height,
                         id: this.id
                     });
-                    this.dx -= this.speed;
-
+                    if (!collisionObject.unit && !collisionObject.map) {
+                        this.dx -= this.speed;
+                    }
                     break;
                 case 'right':
                     collisionObject = collisionDetection({
-                        nextX: this.dx,
-                        nextY: this.dy,
+                        nextX: this.collisionDx(),
+                        nextY: this.collisionDy(),
                         width: this.width,
                         height: this.height,
                         id: this.id
                     });
-                    this.dx += this.speed;
+                    if (!collisionObject.unit && !collisionObject.map) {
+                        this.dx += this.speed;
+                    }
                     break;
             }
             return collisionObject;
         };
-    };
+    }
 
     game.Bullet = Bullet;
     return game;
@@ -690,6 +733,7 @@ var Game = (function (game) {
     var _botsApearenceInterval = null;
     var unitsActions = {};
     var events = game.events;
+    var _pause = false;
 
     unitsActions.localUnitAction = function () {
         unit = game.localUser;
@@ -724,6 +768,7 @@ var Game = (function (game) {
             unit.move(options.direction.left, collision.collisionObject);
             return;
         }
+        unit.tankMoveSound.stop();
     };
 
     unitsActions.botsAction = function () {
@@ -817,6 +862,9 @@ var Game = (function (game) {
         var botsCount = 0;
         var dx, dy = null;
         _botsApearenceInterval = setInterval(function () {
+            if (_pause) {
+                return;
+            }
             if (botsCount === options.botsCount) {
                 clearInterval(_botsApearenceInterval);
                 return;
@@ -830,7 +878,7 @@ var Game = (function (game) {
                 nextX: dx,
                 nextY: dy,
                 width: options.tankWidth,
-                height: options.tankHeigth,
+                height: options.tankHeight,
                 id: botsCount
             }).unit) {
                 dx = options.botsEnterCoords.dx[utils.getRandom(utils.getRandom(options.botsEnterCoords.dx.length))];
@@ -840,8 +888,14 @@ var Game = (function (game) {
         }, options.botsApearenceInterval);
     };
 
+    function togglePause() {
+        _pause = !_pause;
+        game.localUser.tankMoveSound.stop();
+    }
+
     //events
     events.on('win', nextLevel);
+    events.on('/pause', togglePause);
 
     game.unitsActions = unitsActions;
     return game;
@@ -849,12 +903,17 @@ var Game = (function (game) {
 var Game = (function (game) {
     var options = game.options;
     var map = game.map;
+    var events = game.events;
     game.units = [];
     var unitsActions = game.unitsActions;
     var _gameInterval = null;
     game.currentLevel = options.initialLevel;
+    var _pause = false;
 
     function drawGame() {
+        if (_pause) {
+            return;
+        }
         map.mapSprite.clearRect();
         drawMap();
         drawUnits();
@@ -911,6 +970,14 @@ var Game = (function (game) {
         clearInterval(_gameInterval);
         init(nextLevel);
     }
+
+    function togglePause() {
+        _pause = !_pause;
+    }
+
+    // Events
+    events.on('/pause', togglePause);
+
     game.init = init;
     game.reset = reset;
     return game;

@@ -1,12 +1,17 @@
 var Game = (function (game) {
     var options = game.options;
     var map = game.map;
+    var events = game.events;
     game.units = [];
     var unitsActions = game.unitsActions;
     var _gameInterval = null;
     game.currentLevel = options.initialLevel;
+    var _pause = false;
 
     function drawGame() {
+        if (_pause) {
+            return;
+        }
         map.mapSprite.clearRect();
         drawMap();
         drawUnits();
@@ -63,6 +68,14 @@ var Game = (function (game) {
         clearInterval(_gameInterval);
         init(nextLevel);
     }
+
+    function togglePause() {
+        _pause = !_pause;
+    }
+
+    // Events
+    events.on('/pause', togglePause);
+
     game.init = init;
     game.reset = reset;
     return game;
