@@ -118,7 +118,8 @@ var Game = (function (game) {
         setTimeout(function () {
             game.units = [];
             clearInterval(_botsApearenceInterval);
-            _modalWin.classList.add('active');
+            _modalWin.classList.add('active', 'white');
+            _modalHtml.classList.add('game-over');
             _modalHtml.innerHTML = '<button id="restart-btn" class="start-btn" type="button">Restart</button>';
             events.publish('gameOver');
         }, GAME_OVER_TIMEOUT);
@@ -129,14 +130,13 @@ var Game = (function (game) {
         _modalWin.classList.add('active');
         if (game.currentLevel < options.levelsCount) {
             _modalHtml.innerHTML = '<span class="next-level-span">Next Level</span>';
-
             setTimeout(function () {
                 game.reset(game.currentLevel);
                 _modalWin.classList.remove('active');
                 events.publish('nextLevel');
             }, 3000);
         } else {
-            _modalHtml.innerHTML ='<img src="../../src/img/1.jpg">';
+            _modalHtml.innerHTML ='<img src="src/img/1.jpg">';
         }
     }
 

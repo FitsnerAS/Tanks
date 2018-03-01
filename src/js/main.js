@@ -8,14 +8,11 @@
             game.init();
 
         });
-        // document.getElementById('restart-btn').addEventListener('click', function () {
-        //     game.reset();
-        //     document.getElementsByClassName('popup__overlay')[0].classList.remove('active');
-        // });
         document.getElementsByClassName('popup__overlay')[0].addEventListener('click', function (event) {
             if (event.target.id == 'restart-btn') {
                 game.reset();
-                document.getElementsByClassName('popup__overlay')[0].classList.remove('active');
+                document.getElementsByClassName('popup__overlay')[0].classList.remove('active', 'white');
+                document.getElementsByClassName('popup')[0].classList.remove('game-over');
             }
         });
     });
