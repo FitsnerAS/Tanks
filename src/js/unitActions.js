@@ -3,10 +3,15 @@ var Game = (function (game) {
     var collision = game.collision;
     var keys = game.keys;
     var options = game.options;
+
+    var GAME_OVER_TIMEOUT = 0;
+
     var _botsApearenceInterval = null;
     var unitsActions = {};
     var events = game.events;
     var _pause = false;
+    var _modalWin = window.document.getElementsByClassName('popup__overlay')[0];
+    var _modalHtml = window.document.getElementsByClassName('popup')[0];
 
     unitsActions.localUnitAction = function () {
         unit = game.localUser;
@@ -110,24 +115,28 @@ var Game = (function (game) {
     }
 
     function gameOver() {
-        game.units = [];
-        clearInterval(_botsApearenceInterval);
-        window.document.getElementsByClassName('popup__overlay')[0].classList.add('active');
-        events.publish('gameOver');
-
+        setTimeout(function () {
+            game.units = [];
+            clearInterval(_botsApearenceInterval);
+            _modalWin.classList.add('active');
+            _modalHtml.innerHTML = '<button id="restart-btn" class="start-btn" type="button">Restart</button>';
+            events.publish('gameOver');
+        }, GAME_OVER_TIMEOUT);
     }
 
     function nextLevel() {
         game.currentLevel++;
+        _modalWin.classList.add('active');
         if (game.currentLevel < options.levelsCount) {
-            window.document.getElementsByClassName('score')[0].classList.add('new-level');
+            _modalHtml.innerHTML = '<span class="next-level-span">Next Level</span>';
+
             setTimeout(function () {
                 game.reset(game.currentLevel);
-                window.document.getElementsByClassName('score')[0].classList.remove('new-level');
+                _modalWin.classList.remove('active');
                 events.publish('nextLevel');
-            }, options.botsApearenceInterval);
+            }, 3000);
         } else {
-            window.document.getElementsByClassName('score')[0].classList.add('new-level', 'win-game');
+            _modalHtml.innerHTML ='<img src="../../src/img/1.jpg">';
         }
     }
 
