@@ -2,7 +2,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         concat: {
             js: {
-                src: ['src/js/PubSub.js', 'src/js/options.js', 'src/js/utils.js', 'src/js/canvas.js', 'src/js/keyboard.js',
+                src: ['src/js/PubSub.js', 'src/js/options.js', 'src/js/utils.js', 'src/js/localStorage.js', 'src/js/canvas.js', 'src/js/keyboard.js',
                     'src/js/sprite.js', 'src/js/map.js', 'src/js/collision.js', 'src/js/sounds.js', 'src/js/tank.js', 'src/js/bullet.js',
                     'src/js/unitActions.js', 'src/js/draw.js', 'src/js/main.js', 'src/js/score.js'
                 ],

@@ -54,11 +54,14 @@ var Game = (function (game) {
     function init(level) {
         level = level || options.initialLevel;
         map.setTiles(options.map[level]);
-        unitsActions.initBots();
-        game.localUser = new game.Tank(false, options.tanksSpeed, options.localUnitEnterCoords.dx,
-            options.localUnitEnterCoords.dy, true, false, options.direction.up, 21);
-        game.units.push(game.Eagle);
-        game.units.push(game.localUser);
+        if (game.units.length) {
+            unitsActions.initBots();
+            game.localUser = new game.Tank(false, options.tanksSpeed, options.localUnitEnterCoords.dx,
+                options.localUnitEnterCoords.dy, true, false, options.direction.up, 21);
+            game.units.push(game.Eagle);
+            game.units.push(game.localUser);
+        }
+        unitsActions.initBots()
         _gameInterval = setInterval(drawGame, 24);
     }
 

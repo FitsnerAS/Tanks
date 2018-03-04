@@ -6,7 +6,8 @@ var Game = (function (game) {
             down: 40,
             left: 37,
             fire: 32,
-            pause: 80
+            pause: 80,
+            save:  83
         },
         direction: {
             up: 'up',

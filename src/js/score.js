@@ -38,4 +38,7 @@ var Game = (function (game) {
     events.on('hit', hitting);
     events.on('gameOver', init);
     events.on('nextLevel', init);
+
+    game.gameStat = gameStat;
+    return game;
 })(Game);

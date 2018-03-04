@@ -12,6 +12,7 @@ var Game = (function (game) {
     var _pause = false;
     var _modalWin = window.document.getElementsByClassName('popup__overlay')[0];
     var _modalHtml = window.document.getElementsByClassName('popup')[0];
+    var Store = game.store;
 
     unitsActions.localUnitAction = function () {
         unit = game.localUser;
@@ -174,10 +175,22 @@ var Game = (function (game) {
         _pause = !_pause;
         game.localUser.tankMoveSound.stop();
     }
+    function saveGame() {
+        var name = 'SavedGame_' + new Date();
+        var allNames = Store.getObject('names') || [];
+        allNames.push(name);
+        Store.setObject('names', allNames);
+        Store.setObject(name, {
+            level: game.currentLevel,
+            units: game.units,
+            stat: gaem.gameStat
+        });
+    }
 
     //events
     events.on('win', nextLevel);
     events.on('/pause', togglePause);
+    events.on('/save', saveGame);
 
     game.unitsActions = unitsActions;
     return game;

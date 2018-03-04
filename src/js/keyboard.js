@@ -22,6 +22,8 @@ var Game = (function (game) {
             case control.pause:
                 !action && events.publish('/pause');
                 break;
+            case control.save:
+                !action && events.publish('/save');
         }
     }
 
